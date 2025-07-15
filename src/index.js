@@ -2,78 +2,106 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById('create-task-form');
   const taskList = document.getElementById('tasks');
   taskList.style.listStyleType = 'none';
-  const deleteAllBtn = document.getElementById('delete-btn');
   const sortBtn = document.getElementById('sort-tasks');
-document.body.style.background = 'linear-gradient(#ffffff, rgba(51, 48, 68, 1))';
+  sortBtn.style.margin = '10px';
+
+  document.body.style.background = 'linear-gradient(#ffffff, rgba(51, 48, 68, 1))';
+
   let ascending = true;
-form.addEventListener('submit', function(event) {
-  event.preventDefault();
 
-  const taskText = document.getElementById('new-task-description').value.trim();
-  const user = document.getElementById('user').value.trim();
-  const duration = document.getElementById('duration').value.trim();
-  const dueDate = document.getElementById('due-date').value;
-  const priorityValue = document.getElementById('priority').value;
-  const checkbox =document.createElement('input')
-  checkbox.type = 'checkbox';
-  checkbox.addEventListener('change',() => {
-    if (checkbox.checked) {
-      li.style.textDecoration = 'line-through';
-      li.style.opacity = '0.5';
-    } else {
-      li.style.textDecoration = 'none';
-      li.style.opacity = '1';
-    }
-  });
-  if (taskText && user) {
-    const li = document.createElement('li');
-    li.dataset.priority = priorityValue;
+  // Sort button logic
+  sortBtn.addEventListener('click', () => {
+    const tasks = Array.from(taskList.children);
 
-    // Colour by priority
-    switch (priorityValue) {
-      case '1': li.style.color = 'red'; break;
-      case '2': li.style.color = 'orange'; break;
-      case '3': li.style.color = 'green'; break;
-    }
-
-    // Text layout
-    li.innerHTML = `
-      <strong>${taskText}</strong> — assigned to <em>${user}</em> |
-      Duration: ${duration || 'n/a'} |
-      Due: ${dueDate || 'unspecified'}
-    `;
-
-    // Delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.className = 'delete-btn';
-    deleteBtn.style.marginLeft = '10px';
-
-    // Edit button
-    const editBtn = document.createElement('button');
-    editBtn.textContent = 'Edit';
-    editBtn.className = 'edit-btn';
-    editBtn.style.marginLeft = '5px';
-
-    // Edit behavior
-    editBtn.addEventListener('click', () => {
-      document.getElementById('new-task-description').value = taskText;
-      document.getElementById('user').value = user;
-      document.getElementById('duration').value = duration;
-      document.getElementById('due-date').value = dueDate;
-      document.getElementById('priority').value = priorityValue;
-      li.remove(); // Remove current task to replace it on resubmit
+    tasks.sort((a, b) => {
+      const priorityA = parseInt(a.dataset.priority);
+      const priorityB = parseInt(b.dataset.priority);
+      return ascending ? priorityA - priorityB : priorityB - priorityA;
     });
 
-    deleteBtn.addEventListener('click', () => li.remove());
+    taskList.innerHTML = '';
+    tasks.forEach(task => taskList.appendChild(task));
 
-    li.appendChild(editBtn);
-    li.appendChild(deleteBtn);
-    taskList.appendChild(li);
-    li.prepend(checkbox); // Add checkbox at the start of the list item
+    ascending = !ascending;
+    sortBtn.textContent = ascending ? 'Sort Tasks ↑' : 'Sort Tasks ↓';
+    sortBtn.style.margin = '10px';
+  });
 
-    form.reset(); // Clear form fields
-  }
+  // Form submission
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const taskText = document.getElementById('new-task-description').value.trim();
+    const user = document.getElementById('user').value.trim();
+    const duration = document.getElementById('duration').value.trim();
+    const dueDate = document.getElementById('due-date').value;
+    const priorityValue = document.getElementById('priority').value;
+
+    if (taskText && user) {
+      const li = document.createElement('li');
+      let priorityNumber;
+
+      // Assign color and numeric priority
+      switch (priorityValue) {
+        case 'High':
+          priorityNumber = 1;
+          li.style.color = 'red';
+          break;
+        case 'Medium':
+          priorityNumber = 2;
+          li.style.color = 'orange';
+          break;
+        case 'Low':
+          priorityNumber = 3;
+          li.style.color = 'green';
+          break;
+      }
+
+      li.dataset.priority = priorityNumber;
+
+      // Task content
+      li.innerHTML = `
+        <strong>${taskText}</strong> — assigned to <em>${user}</em> |
+        Duration: ${duration || 'n/a'} |
+        Due: ${dueDate || 'unspecified'}
+      `;
+
+      // Checkbox
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.addEventListener('change', () => {
+        li.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+        li.style.opacity = checkbox.checked ? '0.5' : '1';
+      });
+
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.style.marginLeft = '10px';
+      deleteBtn.addEventListener('click', () => li.remove());
+
+      // Edit button
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'Edit';
+      editBtn.className = 'edit-btn';
+      editBtn.style.marginLeft = '5px';
+      editBtn.addEventListener('click', () => {
+        document.getElementById('new-task-description').value = taskText;
+        document.getElementById('user').value = user;
+        document.getElementById('duration').value = duration;
+        document.getElementById('due-date').value = dueDate;
+        document.getElementById('priority').value = priorityValue;
+        li.remove(); // remove so it can be re-added on resubmit
+      });
+
+      // Add elements to the list item
+      li.prepend(checkbox);
+      li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
+
+      taskList.appendChild(li);
+      form.reset();
+    }
+  });
 });
-})
-
