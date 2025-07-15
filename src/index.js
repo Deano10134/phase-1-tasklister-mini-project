@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById('create-task-form');
   const taskList = document.getElementById('tasks');
+  taskList.style.listStyleType = 'none';
   const deleteAllBtn = document.getElementById('delete-btn');
   const sortBtn = document.getElementById('sort-tasks');
 document.body.style.background = 'linear-gradient(#ffffff, rgba(51, 48, 68, 1))';
@@ -13,7 +14,17 @@ form.addEventListener('submit', function(event) {
   const duration = document.getElementById('duration').value.trim();
   const dueDate = document.getElementById('due-date').value;
   const priorityValue = document.getElementById('priority').value;
-
+  const checkbox =document.createElement('input')
+  checkbox.type = 'checkbox';
+  checkbox.addEventListener('change',() => {
+    if (checkbox.checked) {
+      li.style.textDecoration = 'line-through';
+      li.style.opacity = '0.5';
+    } else {
+      li.style.textDecoration = 'none';
+      li.style.opacity = '1';
+    }
+  });
   if (taskText && user) {
     const li = document.createElement('li');
     li.dataset.priority = priorityValue;
@@ -59,6 +70,7 @@ form.addEventListener('submit', function(event) {
     li.appendChild(editBtn);
     li.appendChild(deleteBtn);
     taskList.appendChild(li);
+    li.prepend(checkbox); // Add checkbox at the start of the list item
 
     form.reset(); // Clear form fields
   }
