@@ -18,7 +18,7 @@ form.addEventListener('submit', function(event) {
     const li = document.createElement('li');
     li.dataset.priority = priorityValue;
 
-    // Color by priority
+    // Colour by priority
     switch (priorityValue) {
       case '1': li.style.color = 'red'; break;
       case '2': li.style.color = 'orange'; break;
